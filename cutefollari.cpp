@@ -57,8 +57,8 @@ void CuteFollari::printStations()
 {
     printf("\e[1;1H\e[2J");
 
-    printf("Available bikes: %3d\n", m_bikesAvailable);
-    printf(" ID  Name                              Bikes      Slots       Available\n");
+    printf("Updated: %s\nAvailable bikes: %3d\n", m_lastupdateDateTime.toString().toLocal8Bit().constData(), m_bikesAvailable);
+    printf("ID  Name                               Bikes      Slots       Available\n");
 
     QMapIterator<QString, QVariant> i(m_stations);
     while (i.hasNext()) {
@@ -107,6 +107,10 @@ QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
     map=json.object().toVariantMap();
     m_bikesAvailable=map["bikes_total_avail"].toInt();
     m_stations=map["racks"].toMap();
+
+    m_lastupdate=map["lastupdate"].toUInt();
+
+    m_lastupdateDateTime.setTime_t(m_lastupdate);
 
     printStations();
 

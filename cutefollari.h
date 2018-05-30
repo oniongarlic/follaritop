@@ -53,6 +53,8 @@ private:
 
     bool is_polling;
     uint m_bikesAvailable;
+    uint m_lastupdate;
+    QDateTime m_lastupdateDateTime;
     void printStations();
 };
 
