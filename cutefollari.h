@@ -14,16 +14,17 @@
 #include <QMap>
 #include <QUrl>
 
-#include <QStringListModel>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QVariantMap>
+
+#include "follarirack.h"
 
 class CuteFollari : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(uint bikesAvailable READ getBikesAvailable NOTIFY bikeAvailableChanged)
+    Q_PROPERTY(uint bikesAvailable READ getBikesAvailable NOTIFY bikesAvailableChanged)
 
 public:
     explicit CuteFollari(QObject *parent = nullptr);
@@ -35,8 +36,7 @@ public:
     }
 
 signals:
-
-    void bikeAvailableChanged(uint bikesAvailable);
+    void bikesAvailableChanged(uint bikesAvailable);
 
 public slots:
 
@@ -56,6 +56,8 @@ private:
     uint m_lastupdate;
     QDateTime m_lastupdateDateTime;
     void printStations();
+
+    QMap<QString, FollariRack *> m_racks;
 };
 
 #endif // CUTEFOLLARI_H

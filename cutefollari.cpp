@@ -60,32 +60,15 @@ void CuteFollari::printStations()
     printf("Updated: %s\nAvailable bikes: %3d\n", m_lastupdateDateTime.toString().toLocal8Bit().constData(), m_bikesAvailable);
     printf("ID  Name                               Bikes      Slots       Available\n");
 
-    QMapIterator<QString, QVariant> i(m_stations);
+    QMapIterator<QString, FollariRack *> i(m_racks);
     while (i.hasNext()) {
         i.next();
 
-        QVariantMap r=i.value().toMap();
+        FollariRack *fr=i.value();
 
-        QString stop_code=r["stop_code"].toString();
-        QString name=r["name"].toString();
-        QDateTime last_seen;
-        last_seen.setMSecsSinceEpoch(r["last_seen"].toInt());
+        QString p=QString("%1 %2: [%3] [%4] [%5]").arg(fr->stopCode(),3).arg(fr->stopName(), 32).arg(fr->bikesAvailable(),8).arg(0,8).arg(0,8);
 
-        //lon	22.230363
-        //lat	60.435908
-        uint bikes_avail=r["bikes_avail"].toUInt();
-        uint slots_total=r["slots_total"].toUInt();
-        uint slots_avail=r["slots_avail"].toUInt();
-
-        QString p=QString("%1 %2: [%3] [%4] [%5]").arg(stop_code,3).arg(name, 32).arg(bikes_avail,8).arg(slots_total,8).arg(slots_avail,8);
-
-        printf("%s %s\n", p.toUtf8().constData(), bikes_avail<3 ? "!" : "");
-
-//        printf("%-3ls %-30ls: [%8d] [%8d] [%8d]\n", stop_code.utf16(),
-//               name.toUtf8().constData(),
-//               bikes_avail,
-//               slots_total,
-//               slots_avail);
+        printf("%s %s\n", p.toUtf8().constData(), fr->bikesAvailable()<3 ? "!" : "");
     }
 }
 
@@ -107,21 +90,29 @@ QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
     map=json.object().toVariantMap();
     m_bikesAvailable=map["bikes_total_avail"].toInt();
     m_stations=map["racks"].toMap();
-
     m_lastupdate=map["lastupdate"].toUInt();
-
     m_lastupdateDateTime.setTime_t(m_lastupdate);
 
-    printStations();
-
-    QMapIterator<QString, QVariant> i(map);
+    QMapIterator<QString, QVariant> i(m_stations);
     while (i.hasNext()) {
         i.next();
 
-        QVariantMap tmp=i.value().toMap();
+        QString k=i.key();
+        QVariantMap r=i.value().toMap();
+        FollariRack *fr;
 
-        //qDebug() << tmp;
+        if (m_racks.contains(k)) {
+            fr=m_racks.value(k);
+        } else {
+            fr=new FollariRack(this);
+            m_racks.insert(k, fr);
+        }
+        fr->updateFromVariantMap(r);
     }
+
+    //qDebug() << m_racks.keys();
+
+    printStations();
 
     return map;
 }

@@ -17,7 +17,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    cutefollari.cpp
+    cutefollari.cpp \
+    follarirack.cpp
 
 HEADERS += \
-    cutefollari.h
+    cutefollari.h \
+    follarirack.h
