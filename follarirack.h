@@ -10,6 +10,8 @@ class FollariRack : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(uint bikesAvailable READ bikesAvailable NOTIFY bikesAvailableChanged)
+    Q_PROPERTY(uint slotsAvailable READ slotsAvailable NOTIFY slotsAvailableChanged)
+    Q_PROPERTY(QDateTime lastSeen READ lastSeen NOTIFY lastSeenChanged)
 public:
     FollariRack(QObject *parent=0);
     bool updateFromVariantMap(const QVariantMap r);
@@ -27,12 +29,25 @@ public:
         return m_name;
     }
 
+    uint slotsAvailable() const
+    {
+        return m_slots_avail;
+    }
+
+    QDateTime lastSeen() const
+    {
+        return m_last_seen;
+    }
+
 signals:
     void bikesAvailableChanged(uint bikesAvailable);
+    void slotsAvailableChanged(uint slotsAvailable);
+    void lastSeenChanged(QDateTime lastSeen);
 
 private:
     QString m_stop_code;
     QString m_name;
+    uint m_last_update;
     QDateTime m_last_seen;
     uint m_bikes_avail;
     uint m_slots_total;

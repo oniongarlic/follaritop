@@ -19,7 +19,8 @@ CuteFollari::CuteFollari(QObject *parent) :
     QObject(parent),
     m_manager(new QNetworkAccessManager(this)),
     m_timer(this),
-    is_polling(false)
+    is_polling(false),
+    m_lastupdate(0)
 {
     QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(loadData()));
 }
@@ -30,6 +31,14 @@ void CuteFollari::startPolling()
     m_timer.setSingleShot(true);
     m_timer.start();
     is_polling=true;
+}
+
+FollariRack *CuteFollari::getRack(QString id)
+{
+    if (m_racks.contains(id))
+        return m_racks.value(id);
+
+    return NULL;
 }
 
 void CuteFollari::loadData()
@@ -66,7 +75,7 @@ void CuteFollari::printStations()
 
         FollariRack *fr=i.value();
 
-        QString p=QString("%1 %2: [%3] [%4] [%5]").arg(fr->stopCode(),3).arg(fr->stopName(), 32).arg(fr->bikesAvailable(),8).arg(0,8).arg(0,8);
+        QString p=QString("%1 %2: [%3] [%4] [%5]").arg(fr->stopCode(),3).arg(fr->stopName(), 32).arg(fr->bikesAvailable(),8).arg(fr->slotsAvailable(),8).arg(0,8);
 
         printf("%s %s\n", p.toUtf8().constData(), fr->bikesAvailable()<3 ? "!" : "");
     }
@@ -79,6 +88,7 @@ void CuteFollari::printStations()
  */
 QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
 {
+    uint utmp;
     QVariantMap map;
     QJsonDocument json=QJsonDocument::fromJson(data);
 
@@ -88,10 +98,23 @@ QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
     }
 
     map=json.object().toVariantMap();
-    m_bikesAvailable=map["bikes_total_avail"].toInt();
+
+    utmp=map["lastupdate"].toUInt();
+    if (utmp!=m_lastupdate) {
+        m_lastupdate=utmp;
+        m_lastupdateDateTime.setTime_t(m_lastupdate);
+    } else {
+        return map;
+    }
+
+    utmp=map["bikes_total_avail"].toUInt();
+    if (utmp!=m_bikesAvailable) {
+        m_bikesAvailable=utmp;
+        emit bikesAvailableChanged(m_bikesAvailable);
+    }
+
     m_stations=map["racks"].toMap();
-    m_lastupdate=map["lastupdate"].toUInt();
-    m_lastupdateDateTime.setTime_t(m_lastupdate);
+    m_racks_count=m_stations.count();
 
     QMapIterator<QString, QVariant> i(m_stations);
     while (i.hasNext()) {
@@ -111,6 +134,8 @@ QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
     }
 
     //qDebug() << m_racks.keys();
+
+    emit updated();
 
     printStations();
 

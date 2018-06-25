@@ -34,9 +34,12 @@ public:
     {
         return m_bikesAvailable;
     }
+    FollariRack *getRack(QString id);
 
 signals:
     void bikesAvailableChanged(uint bikesAvailable);
+    void updated();
+    //void
 
 public slots:
 
@@ -52,6 +55,7 @@ private:
     void parseResponse(QNetworkReply *reply);
 
     bool is_polling;
+    uint m_racks_count;
     uint m_bikesAvailable;
     uint m_lastupdate;
     QDateTime m_lastupdateDateTime;
