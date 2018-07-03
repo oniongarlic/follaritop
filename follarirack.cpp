@@ -1,5 +1,7 @@
 #include "follarirack.h"
 
+#include <QDebug>
+
 FollariRack::FollariRack(QObject *parent) :
     QObject(parent),
     m_last_update(0),
@@ -8,6 +10,16 @@ FollariRack::FollariRack(QObject *parent) :
     m_bikes_avail(0)
 {
 
+}
+
+bool FollariRack::compareStopCode(const FollariRack *fr1, const FollariRack *fr2)
+{
+    return fr1->stopCode()<fr2->stopCode();
+}
+
+bool FollariRack::compareBikes(const FollariRack *fr1, const FollariRack *fr2)
+{    
+    return fr1->m_bikes_avail<fr2->m_bikes_avail;
 }
 
 bool FollariRack::updateFromVariantMap(const QVariantMap r)

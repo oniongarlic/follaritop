@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QGeoCoordinate>
 #include <QVariantMap>
+#include <QDebug>
 
 class FollariRack : public QObject
 {
@@ -44,6 +45,8 @@ public:
         return m_last_seen;
     }
 
+    static bool compareStopCode(const FollariRack *fr1, const FollariRack *fr2);
+    static bool compareBikes(const FollariRack *fr1, const FollariRack *fr2);
 signals:
     void bikesAvailableChanged(uint bikesAvailable);
     void slotsAvailableChanged(uint slotsAvailable);
@@ -59,5 +62,6 @@ private:
     uint m_slots_avail;
     QGeoCoordinate m_geo;
 };
+
 
 #endif // FOLLARIRACK_H
