@@ -34,6 +34,11 @@ public:
         return m_slots_avail;
     }
 
+    uint slotsTotal() const
+    {
+        return m_slots_total;
+    }
+
     QDateTime lastSeen() const
     {
         return m_last_seen;
