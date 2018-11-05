@@ -4,10 +4,10 @@
 
 FollariRack::FollariRack(QObject *parent) :
     QObject(parent),
-    m_last_update(0),
-    m_slots_avail(0),
+    m_last_update(0),    
+    m_bikes_avail(0),
     m_slots_total(0),
-    m_bikes_avail(0)
+    m_slots_avail(0)
 {
 
 }
@@ -22,7 +22,7 @@ bool FollariRack::compareBikes(const FollariRack *fr1, const FollariRack *fr2)
     return fr1->m_bikes_avail<fr2->m_bikes_avail;
 }
 
-bool FollariRack::updateFromVariantMap(const QVariantMap r)
+bool FollariRack::updateFromVariantMap(const QVariantMap &r)
 {    
     uint tmp;
 
@@ -35,10 +35,11 @@ bool FollariRack::updateFromVariantMap(const QVariantMap r)
         m_name=r["name"].toString();
     }
 
-    tmp=r["last_seen"].toInt();
-    if (tmp!=m_last_update) {
-        m_last_update=tmp;
-        m_last_seen.setMSecsSinceEpoch(tmp);
+    qint64 ts=r["last_seen"].toLongLong();
+    qDebug() << ts;
+    if (ts!=m_last_update) {
+        m_last_update=ts;
+        m_last_seen.setMSecsSinceEpoch(ts*1000); // "setSecsSinceEpoch in 5.8"
         emit lastSeenChanged(m_last_seen);
     }
 

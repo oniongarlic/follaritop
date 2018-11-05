@@ -14,8 +14,8 @@ class FollariRack : public QObject
     Q_PROPERTY(uint slotsAvailable READ slotsAvailable NOTIFY slotsAvailableChanged)
     Q_PROPERTY(QDateTime lastSeen READ lastSeen NOTIFY lastSeenChanged)
 public:
-    FollariRack(QObject *parent=0);
-    bool updateFromVariantMap(const QVariantMap r);
+    FollariRack(QObject *parent=nullptr);
+    bool updateFromVariantMap(const QVariantMap &r);
 
     uint bikesAvailable() const
     {
@@ -55,7 +55,7 @@ signals:
 private:
     QString m_stop_code;
     QString m_name;
-    uint m_last_update;
+    qint64 m_last_update;
     QDateTime m_last_seen;
     uint m_bikes_avail;
     uint m_slots_total;

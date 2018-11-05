@@ -40,7 +40,7 @@ FollariRack *CuteFollari::getRack(QString id)
     if (m_racks.contains(id))
         return m_racks.value(id);
 
-    return NULL;
+    return nullptr;
 }
 
 void CuteFollari::loadData()
@@ -81,7 +81,7 @@ void CuteFollari::printStations()
 
         QString p=QString("%1 %2: [%3] [%4] [%5]").arg(fr->stopCode(),3).arg(fr->stopName(), 32).arg(fr->bikesAvailable(),8).arg(fr->slotsAvailable(),8).arg(fr->slotsTotal(),8);
 
-        printf("%s %s\n", p.toUtf8().constData(), fr->bikesAvailable()<3 ? "!" : "");
+        printf("%s %s %s\n", p.toUtf8().constData(), fr->bikesAvailable()<3 ? "!" : "", fr->lastSeen().toString().toLocal8Bit().constData());
     }
 }
 
