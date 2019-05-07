@@ -43,6 +43,11 @@ FollariRack *CuteFollari::getRack(QString id)
     return nullptr;
 }
 
+const QList<FollariRack *> CuteFollari::getRacks()
+{
+    return m_racks.values();
+}
+
 void CuteFollari::loadData()
 {
     QUrl url(API_URL);
@@ -59,30 +64,9 @@ QNetworkReply *CuteFollari::get(QNetworkRequest &request)
 
     reply = m_manager->get(request);
     QObject::connect(reply, SIGNAL(finished()), this, SLOT(requestFinished()));
-    //QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(requestError(QNetworkReply::NetworkError)));
+    QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(requestError(QNetworkReply::NetworkError)));
 
     return reply;
-}
-
-void CuteFollari::printStations()
-{
-    printf("\e[1;1H\e[2J");
-
-    printf("Updated: %s\nAvailable bikes: %3d\n", m_lastupdateDateTime.toString().toLocal8Bit().constData(), m_bikesAvailable);
-    printf("ID  Name                               Bikes      Slots       Available\n");
-
-    QList<FollariRack *> k=m_racks.values();
-
-    std::sort(k.begin(), k.end(), FollariRack::compareBikes);
-
-    QListIterator<FollariRack *> i(k);
-    while (i.hasNext()) {
-        FollariRack *fr=i.next();
-
-        QString p=QString("%1 %2: [%3] [%4] [%5]").arg(fr->stopCode(),3).arg(fr->stopName(), 32).arg(fr->bikesAvailable(),8).arg(fr->slotsAvailable(),8).arg(fr->slotsTotal(),8);
-
-        printf("%s %s %s\n", p.toUtf8().constData(), fr->bikesAvailable()<3 ? "!" : "", fr->lastSeen().toString().toLocal8Bit().constData());
-    }
 }
 
 /**
@@ -135,13 +119,9 @@ QVariantMap CuteFollari::parseJsonResponse(const QByteArray &data)
             m_racks.insert(k, fr);
         }
         fr->updateFromVariantMap(r);
-    }
+    }   
 
-    //qDebug() << m_racks.keys();
-
-    emit updated();
-
-    printStations();
+    emit updated();    
 
     return map;
 }
@@ -164,27 +144,27 @@ void CuteFollari::parseResponse(QNetworkReply *reply)
     case 401:
     case 403:
         qWarning("Authentication error");
-        //parseErrorResponse(hc, op, data);
+        emit error(hc);
         break;
     case 400:
         qWarning("Invalid request failure");
-        //parseErrorResponse(hc, op, data);
+        emit error(hc);
         break;
     case 404:
         qWarning("Not found failure");
-        //parseErrorResponse(hc, op, data);
+        emit error(hc);
         break;
     case 500:
         qWarning("Server failure");
-        //parseErrorResponse(hc, op, data);
+        emit error(hc);
         break;
     case 0:
         qWarning("Generic network failure");
-        //emit requestFailure(hc, "Network error "+reply->errorString());
+        emit error(hc);
         break;
     default: {
         qWarning() << "Unexpected and unhandled response code: " << hc;
-
+        emit error(hc);
         break;
     }
     }
@@ -200,4 +180,12 @@ void CuteFollari::requestFinished() {
     }
 
     reply->deleteLater();
+}
+
+void CuteFollari::requestError(QNetworkReply::NetworkError e)
+{
+    qWarning() << "Network error" << e;
+
+    m_timer.stop();
+    is_polling=false;
 }

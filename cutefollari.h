@@ -34,18 +34,25 @@ public:
     {
         return m_bikesAvailable;
     }
+    const QDateTime getUpdateDateTime() {
+        return m_lastupdateDateTime;
+    }
     FollariRack *getRack(QString id);
+    const QList<FollariRack *> getRacks();
 
 signals:
     void bikesAvailableChanged(uint bikesAvailable);
     void updated();
+    void error(int code);
     //void
 
 public slots:
 
 private slots:
     void requestFinished();
+    void requestError(QNetworkReply::NetworkError e);
     void loadData();
+
 private:
     QNetworkAccessManager *m_manager;
     QTimer m_timer;
@@ -58,8 +65,7 @@ private:
     uint m_racks_count;
     uint m_bikesAvailable;
     uint m_lastupdate;
-    QDateTime m_lastupdateDateTime;
-    void printStations();
+    QDateTime m_lastupdateDateTime;    
 
     QMap<QString, FollariRack *> m_racks;
 };
